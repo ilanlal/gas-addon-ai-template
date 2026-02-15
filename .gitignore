@@ -1,15 +1,19 @@
-.clasp.json
-*.clasp.json
-.vscode
-.vscode/launch.json
-node_modules/
-coverage/
+# Ignore build artifacts
+build/
 dist/
-.idea/
-*.iml
-*.log
-.*.swp
-package-lock.json
-
+# Ignore test coverage reports
+coverage/
+# Ignore the .vscode directory and its settings.
+.vscode/
+# Ignore node_modules and IDE-specific files
+node_modules/
+# Ignore environment variable files and npm configuration
 .npmrc
-.env
+# Ignore log files and temporary files
+*.log
+# Ignore OS-specific files
+.DS_Store
+# Ignore clasp configuration files
+.clasp.json
+# Ignore package-lock.json.
+package-lock.json

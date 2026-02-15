@@ -1,11 +1,11 @@
 // src/Addon.js
 class Addon {
     static primaryColor() {
-        return '#88001b'; // Matching the primary color from appsscript.json
+        return '#1010ff';
     }
 
     static secondaryColor() {
-        return '#1010ff'; // Matching the secondary color from appsscript.json
+        return '#88001b';
     }
 
     static accentColor() {
@@ -25,10 +25,10 @@ Addon.Media = {
 };
 
 Addon.Package = {
-    name: 'Json Studio',
-    short_description: 'JSON editing tools for Sheets',
-    description: 'A collection of tools for working with JSON data in Google Sheets, including beautification, minification, validation, and more.',
-    version: '1.11.0',
+    name: 'AI Studio',
+    short_description: 'AI tools for Google Workspace',
+    description: 'A collection of AI-powered tools to enhance your productivity in Google Workspace applications.',
+    version: '1.0.0',
     build: '20260214.125400',
     author: 'Ilan Laloum',
     license: 'MIT',
@@ -346,14 +346,58 @@ Addon.Modules = {
             }
             return value;
         }
+    },
+    GeminiAPI: class {
+        static get MODELS() {
+            return {
+                'gemini-3-flash-preview': 'gemini-3-flash-preview',
+                'gemini-3-flash': 'gemini-3-flash',
+                'gemini-3': 'gemini-3',
+                'gemini-2.5-pro': 'gemini-2.5-pro',
+                'gemini-2.5': 'gemini-2.5',
+                'gemini-2.0-pro': 'gemini-2.0-pro',
+                'gemini-2.0': 'gemini-2.0'
+            };
+        }
+
+        static get API_ENDPOINT_URL() {
+            return 'https://generativelanguage.googleapis.com/v1beta/models/';
+        }
+
+        /**
+         * Generates content using the Gemini API.
+         * @param {string} apiKey - The API key for authentication.
+         * @param {string} model - The model name to use for content generation.
+         * @param {{}} payload - The payload to send in the request.
+         * @returns {{}} - The response content from the Gemini API.
+         * @throws {Error} - If the API request fails.
+         */
+        static generateContent(apiKey, model, payload) {
+            const url = `${this.API_ENDPOINT_URL}${model}:generateContent`;
+            const options = {
+                method: 'POST',
+                contentType: 'application/json',
+                headers: {
+                    'x-goog-api-key': apiKey,
+                },
+                payload: JSON.stringify(payload)
+            };
+
+            const response = UrlFetchApp.fetch(url, options);
+            if (response.getResponseCode() === 200) {
+                return JSON.parse(response.getContentText());
+            } else {
+                throw new Error(`Gemini API request failed with status ${response.getResponseCode()}: ${response.getContentText()}`);
+            }
+        }
     }
 };
 
 Addon.Home = {
     id: 'HomeAddon',
-    name: 'Json Studio',
-    short_description: 'JSON editing tools for Sheets',
-    description: 'A collection of tools for editing and managing JSON data in Google Sheets.',
+    name: 'AI Studio',
+    short_description: 'AI tools for Google Workspace',
+    description: 'A collection of AI-powered tools to enhance your productivity in Google Workspace applications.',
     version: '1.0.0',
     Controller: {
         Load: (e) => {
@@ -395,7 +439,7 @@ Addon.Home = {
                         .pushCard(Addon.Home.View.HelpCard({ ...appModelData }))
                 ).build();
         },
-        Beautify: (e) => {
+        GenerateContent: (e) => {
             const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
 
             try {
@@ -517,13 +561,13 @@ Addon.Home = {
                     .setSubtitle(Addon.Package.short_description)
                     .setImageStyle(CardService.ImageStyle.SQUARE)
                     .setImageUrl(Addon.Package.imageUrl)
-                    .setImageAltText('Json Studio Logo'));
+                    .setImageAltText('AI Studio Logo'));
 
 
             cardBuilder.addSection(CardService.newCardSection()
                 .addWidget(
                     CardService.newTextParagraph()
-                        .setText('Select a range of cells containing JSON data in your sheet, then use the tools below to parse or validate the JSON.')));
+                        .setText(`Welcome to ${Addon.Package.name}! This add-on provides a collection of AI-powered tools to enhance your productivity in Google Workspace applications. Use the tools below to get started with editing and managing your JSON data efficiently.`)));
 
             // Plugin Hub Section
             cardBuilder.addSection(Addon.Home.View._BuildPluginHubSection(data));
@@ -650,6 +694,11 @@ Addon.Home = {
             return cardBuilder.build();
         },
         _BuildPluginHubSection: (data = {}) => {
+            const listOfTools = [
+                { name: 'Generate Content', description: 'Create new content using AI.', icon: 'auto_awesome', action: 'GenerateContent' },
+                { name: 'Minify', description: 'Compress your JSON data for efficient storage.', icon: 'compress', action: 'Minify' },
+                { name: 'Validate', description: 'Check your JSON data for errors.', icon: 'check_circle', action: 'Validate' }
+            ];
             const pluginHub = CardService.newCardSection()
                 .setHeader('🛠️ Available Tools')
                 .setCollapsible(false);
@@ -657,68 +706,30 @@ Addon.Home = {
             // Add divider
             pluginHub.addWidget(CardService.newDivider());
 
-            // Add a tool - Beautify JSON
-            const beautifyJson = CardService.newDecoratedText()
-                .setTopLabel('🎨 Beautify')
-                .setBottomLabel('Format your JSON data for better readability.')
-                .setWrapText(true)
-                .setButton(
-                    CardService.newTextButton()
-                        .setText('Format')
-                        .setAltText('Beautify JSON within selected cells')
-                        .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
-                        .setMaterialIcon(
-                            CardService.newMaterialIcon()
-                                .setName('format_indent_increase')
-                                .setFill(false)
-                        )
-                        .setOnClickAction(
-                            CardService.newAction()
-                                .setFunctionName(`Addon.Home.Controller.Beautify`)
-                        )
-                );
+            // Add each tool as a decorated text with an action button
+            listOfTools.forEach(tool => {
+                const decoratedText = CardService.newDecoratedText()
+                    .setTopLabel(`🎨 ${tool.name}`)
+                    .setBottomLabel(tool.description)
+                    .setWrapText(true)
+                    .setButton(
+                        CardService.newTextButton()
+                            .setText(tool.name)
+                            .setAltText(`${tool.name} JSON within selected cells`)
+                            .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
+                            .setMaterialIcon(
+                                CardService.newMaterialIcon()
+                                    .setName(tool.icon)
+                                    .setFill(false)
+                            )
+                            .setOnClickAction(
+                                CardService.newAction()
+                                    .setFunctionName(`Addon.Home.Controller.${tool.action}`)
+                            )
+                    );
 
-            pluginHub.addWidget(beautifyJson);
-
-            // Add another tool - Minify JSON
-            const minifyJson = CardService.newDecoratedText()
-                .setTopLabel('🗜️ Minify')
-                .setBottomLabel('Compress your JSON data for efficient storage.')
-                .setWrapText(true)
-                .setButton(
-                    CardService.newTextButton()
-                        .setText('Minify')
-                        .setAltText('Minify JSON within selected cells')
-                        .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
-                        .setMaterialIcon(
-                            CardService.newMaterialIcon().setName('compress'))
-                        .setOnClickAction(
-                            CardService.newAction()
-                                .setFunctionName(`Addon.Home.Controller.Minify`)
-                        )
-                );
-
-            pluginHub.addWidget(minifyJson);
-
-            // Add another tool - Validate JSON
-            const validateJson = CardService.newDecoratedText()
-                .setTopLabel('✅ Validate')
-                .setBottomLabel('Check your JSON data for errors.')
-                .setWrapText(true)
-                .setButton(
-                    CardService.newTextButton()
-                        .setText('Validate')
-                        .setAltText('Validate JSON within selected cells')
-                        .setTextButtonStyle(CardService.TextButtonStyle.FILLED)
-                        .setMaterialIcon(
-                            CardService.newMaterialIcon().setName('check_circle'))
-                        .setOnClickAction(
-                            CardService.newAction()
-                                .setFunctionName(`Addon.Home.Controller.Validate`)
-                        )
-                );
-
-            pluginHub.addWidget(validateJson);
+                pluginHub.addWidget(decoratedText);
+            });
 
             // Return the completed plugin hub section
             return pluginHub;
@@ -808,7 +819,7 @@ Addon.Home = {
                         CardService.newMaterialIcon().setName('workspace_premium')))
                     .setBottomLabel(data.isPremium
                         ? `Expires on: ${data.expiresAt ? data.expiresAt.toDateString() : 'N/A'} | Balance: $${data.balance.toFixed(2)}`
-                        : 'Upgrade to unlock advanced JSON tools.'));
+                        : 'Upgrade to unlock advanced AI tools.'));
             return membershipSection;
         }
     }
@@ -818,7 +829,7 @@ Addon.Settings = {
     id: 'SettingsPlugin',
     name: 'Settings',
     short_description: 'Manage addon settings',
-    description: 'Configure your Json Studio preferences and settings.',
+    description: 'Configure your AI Studio preferences and settings.',
     version: '1.0.0',
     imageUrl: Addon.Media.WELCOME_IMG_URL,
     Controller: {
@@ -846,7 +857,7 @@ Addon.Settings = {
             // highlight_color
             const highlightColor = e?.commonEventObject
                 ?.formInputs?.[Addon.INPUT_PARAMETERS.highlight_color]
-                ?.stringInputs?.value[0] || "#FFFF00";
+                ?.stringInputs?.value[0] || Addon.accentColor();
             PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.highlight_color, highlightColor);
 
             // ignore_whitespace_switch
@@ -905,8 +916,8 @@ Addon.Settings = {
 
             // create show errors card decorated text with switch widget
             const showErrorsDecoratedText = CardService.newDecoratedText()
-                .setText('Show Errors After JSON Operations')
-                .setBottomLabel('Display detailed error reports after performing JSON operations.')
+                .setText('Show Errors After Operations')
+                .setBottomLabel('Display detailed error reports after operations.')
                 .setWrapText(true)
                 .setStartIcon(
                     CardService.newIconImage().setMaterialIcon(
@@ -928,7 +939,7 @@ Addon.Settings = {
             // add ignore whitespace decorated text with switch widget
             const ignoreWhitespaceDecoratedText = CardService.newDecoratedText()
                 .setText('Ignore Whitespace')
-                .setBottomLabel('Ignore empty cells or cells with only whitespace during JSON operations.')
+                .setBottomLabel('Ignore empty cells or cells with only whitespace during operations.')
                 .setWrapText(true)
                 .setStartIcon(
                     CardService.newIconImage().setMaterialIcon(

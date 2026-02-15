@@ -10,9 +10,12 @@
     "https://www.googleapis.com/auth/script.locale",
     "https://www.googleapis.com/auth/spreadsheets.currentonly"
   ],
+  "urlFetchWhitelist": [
+    "https://generativelanguage.googleapis.com/"
+  ],
   "addOns": {
     "common": {
-      "name": "Json Studio",
+      "name": "AI Studio",
       "logoUrl": "https://raw.githubusercontent.com/ilanlal/ss-json-editor/refs/heads/main/assets/logo24.png",
       "layoutProperties": {
         "primaryColor": "#88001b",
@@ -48,7 +51,7 @@
         },
         {
           "label": "Visit Website",
-          "openLink": "https://www.easyadm.com/add-ons/json-studio"
+          "openLink": "https://www.easyadm.com/"
         }
       ]
     },
