@@ -36,7 +36,7 @@ Addon.Package = {
     gitRepository: 'https://github.com/ilanlal/ss-json-editor'
 };
 
-Addon.INPUT_PARAMETERS = {
+Addon.PROPERTIES = {
     get indentation_spaces() {
         return 'indentation_spaces';
     },
@@ -54,6 +54,15 @@ Addon.INPUT_PARAMETERS = {
     },
     get ignore_whitespace_switch() {
         return 'ignore_whitespace_switch';
+    },
+    get prompt_text_input() {
+        return 'prompt_text_input';
+    },
+    get gemini_api_key() {
+        return 'GEMINI_API_KEY';
+    },
+    get gemini_model_selector() {
+        return 'GEMINI_MODEL_SELECTOR';
     }
 };
 
@@ -72,12 +81,12 @@ Addon.Modules = {
             const expiresAt = membershipInfo.expiresAt ? new Date(membershipInfo.expiresAt) : null;
             const balance = membershipInfo.balance || 0;
             const isPremium = (expiresAt && expiresAt > new Date()) || balance > 0;
-            const indentationSpaces = properties.getProperty(Addon.INPUT_PARAMETERS.indentation_spaces) || Addon.Modules.App.DEFAULT_INDENTATION_SPACES;
-            const showErrorsSwitch = properties.getProperty(Addon.INPUT_PARAMETERS.show_errors_switch) || 'ON';
-            const highlightColor = properties.getProperty(Addon.INPUT_PARAMETERS.highlight_color) || '#FFFF00';
-            const terminalOutputSwitch = properties.getProperty(Addon.INPUT_PARAMETERS.terminal_output_switch) || 'OFF';
-            const focusTerminalOutput = properties.getProperty(Addon.INPUT_PARAMETERS.focus_terminal_output) || 'OFF';
-            const ignoreWhitespaceSwitch = properties.getProperty(Addon.INPUT_PARAMETERS.ignore_whitespace_switch) || 'ON';
+            const indentationSpaces = properties.getProperty(Addon.PROPERTIES.indentation_spaces) || Addon.Modules.App.DEFAULT_INDENTATION_SPACES;
+            const showErrorsSwitch = properties.getProperty(Addon.PROPERTIES.show_errors_switch) || 'ON';
+            const highlightColor = properties.getProperty(Addon.PROPERTIES.highlight_color) || '#FFFF00';
+            const terminalOutputSwitch = properties.getProperty(Addon.PROPERTIES.terminal_output_switch) || 'OFF';
+            const focusTerminalOutput = properties.getProperty(Addon.PROPERTIES.focus_terminal_output) || 'OFF';
+            const ignoreWhitespaceSwitch = properties.getProperty(Addon.PROPERTIES.ignore_whitespace_switch) || 'ON';
 
             return {
                 indentation_spaces: parseInt(indentationSpaces, 10),
@@ -446,15 +455,15 @@ Addon.Home = {
                 const formInputs = e?.commonEventObject?.formInputs || {};
 
                 // Read settings from properties
-                const indentationSpaces = formInputs?.[Addon.INPUT_PARAMETERS.indentation_spaces]?.stringInputs?.value[0] || "2";
-                PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.indentation_spaces, indentationSpaces);
+                const indentationSpaces = formInputs?.[Addon.PROPERTIES.indentation_spaces]?.stringInputs?.value[0] || "2";
+                PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.indentation_spaces, indentationSpaces);
 
                 // show_errors_switch
-                const showErrorsState = formInputs?.[Addon.INPUT_PARAMETERS.show_errors_switch]?.stringInputs?.value[0] || "OFF";
-                PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.show_errors_switch, showErrorsState);
+                const showErrorsState = formInputs?.[Addon.PROPERTIES.show_errors_switch]?.stringInputs?.value[0] || "OFF";
+                PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.show_errors_switch, showErrorsState);
 
                 // ignore_whitespace_switch
-                const ignoreWhitespaceState = PropertiesService.getUserProperties().getProperty(Addon.INPUT_PARAMETERS.ignore_whitespace_switch) || 'ON';
+                const ignoreWhitespaceState = PropertiesService.getUserProperties().getProperty(Addon.PROPERTIES.ignore_whitespace_switch) || 'ON';
 
                 const result = Addon.Modules.JsonStudio.beautifyActiveRange(activeSpreadsheet, parseInt(indentationSpaces, 10), ignoreWhitespaceState === 'ON');
                 return Addon.Home.Controller._HandleResultNavigation(e, result);
@@ -473,15 +482,15 @@ Addon.Home = {
                 const formInputs = e?.commonEventObject?.formInputs || {};
 
                 // show_errors_switch
-                const showErrorsState = formInputs?.[Addon.INPUT_PARAMETERS.show_errors_switch]?.stringInputs?.value[0] || "OFF";
-                PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.show_errors_switch, showErrorsState);
+                const showErrorsState = formInputs?.[Addon.PROPERTIES.show_errors_switch]?.stringInputs?.value[0] || "OFF";
+                PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.show_errors_switch, showErrorsState);
 
                 // Indentation spaces (not used in validate, but saved for consistency)
-                const indentationSpaces = formInputs?.[Addon.INPUT_PARAMETERS.indentation_spaces]?.stringInputs?.value[0] || "2";
-                PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.indentation_spaces, indentationSpaces);
+                const indentationSpaces = formInputs?.[Addon.PROPERTIES.indentation_spaces]?.stringInputs?.value[0] || "2";
+                PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.indentation_spaces, indentationSpaces);
 
                 // ignore_whitespace_switch
-                const ignoreWhitespaceState = PropertiesService.getUserProperties().getProperty(Addon.INPUT_PARAMETERS.ignore_whitespace_switch) || 'ON';
+                const ignoreWhitespaceState = PropertiesService.getUserProperties().getProperty(Addon.PROPERTIES.ignore_whitespace_switch) || 'ON';
 
                 const result = Addon.Modules.JsonStudio.minifyActiveRange(activeSpreadsheet, ignoreWhitespaceState === 'ON');
                 return Addon.Home.Controller._HandleResultNavigation(e, result);
@@ -501,15 +510,15 @@ Addon.Home = {
             try {
                 const formInputs = e?.commonEventObject?.formInputs || {};
                 // show_errors_switch
-                const showErrorsState = formInputs?.[Addon.INPUT_PARAMETERS.show_errors_switch]?.stringInputs?.value[0] || "OFF";
-                properties.setProperty(Addon.INPUT_PARAMETERS.show_errors_switch, showErrorsState);
+                const showErrorsState = formInputs?.[Addon.PROPERTIES.show_errors_switch]?.stringInputs?.value[0] || "OFF";
+                properties.setProperty(Addon.PROPERTIES.show_errors_switch, showErrorsState);
 
                 // Indentation spaces (not used in validate, but saved for consistency)
-                const indentationSpaces = formInputs?.[Addon.INPUT_PARAMETERS.indentation_spaces]?.stringInputs?.value[0] || "2";
-                properties.setProperty(Addon.INPUT_PARAMETERS.indentation_spaces, indentationSpaces);
+                const indentationSpaces = formInputs?.[Addon.PROPERTIES.indentation_spaces]?.stringInputs?.value[0] || "2";
+                properties.setProperty(Addon.PROPERTIES.indentation_spaces, indentationSpaces);
 
                 // ignore_whitespace_switch
-                const ignoreWhitespaceState = properties.getProperty(Addon.INPUT_PARAMETERS.ignore_whitespace_switch) || 'ON';
+                const ignoreWhitespaceState = properties.getProperty(Addon.PROPERTIES.ignore_whitespace_switch) || 'ON';
                 const result = Addon.Modules.JsonStudio.validateActiveRange(activeSpreadsheet, ignoreWhitespaceState === 'ON');
                 return Addon.Home.Controller._HandleResultNavigation(e, result);
             }
@@ -523,7 +532,7 @@ Addon.Home = {
         },
         _HandleResultNavigation: (e, result) => {
             const formInputs = e?.commonEventObject?.formInputs || {};
-            const showErrorsState = formInputs?.[Addon.INPUT_PARAMETERS.show_errors_switch]?.stringInputs?.value[0] || "OFF";
+            const showErrorsState = formInputs?.[Addon.PROPERTIES.show_errors_switch]?.stringInputs?.value[0] || "OFF";
             if (result.report.length > 0) {
                 if (showErrorsState === 'ON') {
                     // Build and return the result card
@@ -773,7 +782,7 @@ Addon.Home = {
                     .setType(CardService.SelectionInputType.DROPDOWN)
                     // Enable for premium users
                     .setTitle('Code Indentation Spaces')
-                    .setFieldName(Addon.INPUT_PARAMETERS.indentation_spaces)
+                    .setFieldName(Addon.PROPERTIES.indentation_spaces)
                     .addItem('1 {.}', '1', data.indentation_spaces === 1)
                     .addItem('2 {..} (default)', '2', data.indentation_spaces === 2) // Default selected
                     .addItem('4 {....}', '4', data.indentation_spaces === 4)
@@ -799,7 +808,7 @@ Addon.Home = {
                 )
                 .setSwitchControl(
                     CardService.newSwitch()
-                        .setFieldName(Addon.INPUT_PARAMETERS.show_errors_switch)
+                        .setFieldName(Addon.PROPERTIES.show_errors_switch)
                         .setValue('ON')
                         .setSelected(data.show_errors_switch === 'ON')
                         .setControlType(CardService.SwitchControlType.CHECK_BOX)
@@ -844,27 +853,27 @@ Addon.Settings = {
         },
         SaveSettings: (e) => {
             const selectedSpaces = e?.commonEventObject
-                ?.formInputs?.[Addon.INPUT_PARAMETERS.indentation_spaces]
+                ?.formInputs?.[Addon.PROPERTIES.indentation_spaces]
                 ?.stringInputs?.value[0] || "2";
-            PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.indentation_spaces, selectedSpaces);
+            PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.indentation_spaces, selectedSpaces);
 
             // show_errors_switch
             const showErrorsState = e?.commonEventObject
-                ?.formInputs?.[Addon.INPUT_PARAMETERS.show_errors_switch]
+                ?.formInputs?.[Addon.PROPERTIES.show_errors_switch]
                 ?.stringInputs?.value[0] || "OFF";
-            PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.show_errors_switch, showErrorsState);
+            PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.show_errors_switch, showErrorsState);
 
             // highlight_color
             const highlightColor = e?.commonEventObject
-                ?.formInputs?.[Addon.INPUT_PARAMETERS.highlight_color]
+                ?.formInputs?.[Addon.PROPERTIES.highlight_color]
                 ?.stringInputs?.value[0] || Addon.accentColor();
-            PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.highlight_color, highlightColor);
+            PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.highlight_color, highlightColor);
 
             // ignore_whitespace_switch
             const ignoreWhitespaceState = e?.commonEventObject
-                ?.formInputs?.[Addon.INPUT_PARAMETERS.ignore_whitespace_switch]
+                ?.formInputs?.[Addon.PROPERTIES.ignore_whitespace_switch]
                 ?.stringInputs?.value[0] || "OFF";
-            PropertiesService.getUserProperties().setProperty(Addon.INPUT_PARAMETERS.ignore_whitespace_switch, ignoreWhitespaceState);
+            PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.ignore_whitespace_switch, ignoreWhitespaceState);
 
             // Build and return the Home Card
             const appModelData = Addon.Modules.App.getData();
@@ -926,7 +935,7 @@ Addon.Settings = {
                     ))
                 .setSwitchControl(
                     CardService.newSwitch()
-                        .setFieldName(Addon.INPUT_PARAMETERS.show_errors_switch)
+                        .setFieldName(Addon.PROPERTIES.show_errors_switch)
                         .setValue('ON')
                         .setSelected(data.show_errors_switch === 'ON')
                         .setControlType(CardService.SwitchControlType.CHECK_BOX)
@@ -948,7 +957,7 @@ Addon.Settings = {
                     ))
                 .setSwitchControl(
                     CardService.newSwitch()
-                        .setFieldName(Addon.INPUT_PARAMETERS.ignore_whitespace_switch)
+                        .setFieldName(Addon.PROPERTIES.ignore_whitespace_switch)
                         .setValue('ON')
                         .setSelected(data.ignore_whitespace_switch === 'ON')
                         .setControlType(CardService.SwitchControlType.CHECK_BOX)
@@ -964,7 +973,7 @@ Addon.Settings = {
                     .setType(CardService.SelectionInputType.DROPDOWN)
                     // Enable for premium users
                     .setTitle('Indentation Spaces')
-                    .setFieldName(Addon.INPUT_PARAMETERS.indentation_spaces)
+                    .setFieldName(Addon.PROPERTIES.indentation_spaces)
                     .addItem('1 {.}', '1', data.indentation_spaces === 1)
                     .addItem('2 {..} (default)', '2', data.indentation_spaces === 2) // Default selected
                     .addItem('4 {....}', '4', data.indentation_spaces === 4)
@@ -981,7 +990,7 @@ Addon.Settings = {
                     .setType(CardService.SelectionInputType.DROPDOWN)
                     // Enable for premium users
                     .setTitle('Highlight Color')
-                    .setFieldName(Addon.INPUT_PARAMETERS.highlight_color)
+                    .setFieldName(Addon.PROPERTIES.highlight_color)
                     .addItem('🔴 Red', '#FF0000', data.highlight_color === '#FF0000')
                     .addItem('🟢 Green', '#00FF00', data.highlight_color === '#00FF00')
                     .addItem('🔵 Blue', '#0000FF', data.highlight_color === '#0000FF')
@@ -1220,7 +1229,6 @@ Addon.ConfirmationCard = {
                 .build();
         },
         Confirm: (e) => {
-            // extract parameters from event object onClickFunctionName = 'Plugins['Name'].Controller['Function']', onClickParameters={}
             const onClickFunctionName = e?.commonEventObject?.parameters?.onClickFunctionName || null;
             const onClickParameters = e?.commonEventObject?.parameters?.onClickParameters || {};
 
@@ -1351,7 +1359,7 @@ Addon.ResultWidget = {
                 const sheet = activeSpreadsheet.getSheetByName(sheetName);
                 const range = sheet.getRange(a1n);
                 // Highlight the range with a yellow background
-                const hightlightColor = PropertiesService.getUserProperties().getProperty(Addon.INPUT_PARAMETERS.highlight_color) || '#FFFF00';
+                const hightlightColor = PropertiesService.getUserProperties().getProperty(Addon.PROPERTIES.highlight_color) || '#FFFF00';
                 range.setBackground(hightlightColor);
 
                 // Return action response with notification
@@ -1488,6 +1496,149 @@ Addon.ResultWidget = {
                                 })
                         )
                 );
+        }
+    }
+};
+
+Addon.GenerateContent = {
+    id: 'GenerateContentPlugin',
+    name: 'Content Generator',
+    short_description: 'Generate content using AI models',
+    description: 'A plugin that allows users to generate content using AI models directly from the add-on interface. Users can input prompts and receive generated content that can be inserted into their spreadsheets.',
+    version: '1.0.0',
+    imageUrl: Addon.Media.YOU_GOT_IT_IMG_URL,
+    Controller: {
+        Load: (e) => {
+            const data = e?.commonEventObject?.parameters || {};
+            const isUpdate = data.update === 'true';
+            const isPop = data.popCard === 'true';
+
+            try {
+
+                // Build and return the Home Card
+                const appModelData = Addon.Modules.App.getData();
+
+                // Build and return the Home Card
+                const card = Addon.GenerateContent.View.HomeCard({ ...appModelData });
+
+                let cardNavigation = null;
+
+                if (isPop) {
+                    cardNavigation = CardService.newNavigation()
+                        .popCard();
+                } else {
+                    if (isUpdate) {
+                        cardNavigation = CardService.newNavigation()
+                            .updateCard(card);
+                    } else {
+                        cardNavigation = CardService.newNavigation()
+                            .pushCard(card);
+                    }
+                }
+
+
+                // Return action response to update card
+                return CardService.newActionResponseBuilder()
+                    .setNavigation(cardNavigation)
+                    .build();
+            }
+            catch (error) {
+                return CardService.newActionResponseBuilder()
+                    .setNotification(
+                        CardService.newNotification()
+                            .setText(`❌ Error loading content generator: ${error.toString()}`))
+                    .build();
+            }
+        },
+        GenerateContent: (e) => {
+            const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+            const data = e?.commonEventObject?.parameters || {};
+            const source = 'Addon.GenerateContent';
+            try {
+                const prompt = data[Addon.PROPERTIES.prompt_text_input] || '';
+                const geminiModel = data[Addon.PROPERTIES.gemini_model_selector] || 'gemini-1.5-pro';
+                const gemini_api_key = PropertiesService.getUserProperties().getProperty(Addon.PROPERTIES.gemini_api_key) || '[YOUR_API_KEY]';
+                const generationConfig = {
+                    thinkingConfig: {
+                        thinkingLevel: 'low'
+                    },
+                    temperature: 1,
+                    topP: 0.95,
+                    topK: 40,
+                    responseMimeType: 'text/plain'
+                };
+
+                const systemInstruction = {
+                    parts: [{
+                        text: 'You are a cat. Your name is Neko.'
+                    }]
+                };
+
+                const payload = {
+                    generationConfig,
+                    systemInstruction,
+                    contents: [
+                        {
+                            parts: [{ text: prompt }]
+                        }
+                    ]
+                };
+                const content = Addon.Modules.GeminiAPI.generateContent(gemini_api_key, geminiModel, payload);
+                // Insert generated content into Terminal Sheet
+                Addon.Modules.TerminalOutput.write(activeSpreadsheet, source, 'GeminiAPI Response', JSON.stringify(e), JSON.stringify(payload), JSON.stringify(content), geminiModel);
+
+                // Return action response with notification
+                return CardService.newActionResponseBuilder()
+                    .setNotification(
+                        CardService.newNotification()
+                            .setText(`✅ Content generated and inserted into Terminal Sheet successfully.`))
+                    .build();
+            }
+            catch (error) {
+                Addon.Modules.TerminalOutput.write(activeSpreadsheet, source, 'Error', JSON.stringify(e), error.toString());
+                return CardService.newActionResponseBuilder()
+                    .setNotification(
+                        CardService.newNotification()
+                            .setText(`❌ Error during Beautify: ${error.message}`))
+                    .build();
+            }
+        }
+    },
+    View: {
+        HomeCard: (data = {}) => {
+            const cardBuilder = CardService.newCardBuilder()
+                .setName(Addon.GenerateContent.id + '-Home')
+                .setHeader(CardService.newCardHeader()
+                    .setTitle(Addon.GenerateContent.name)
+                    .setSubtitle(Addon.GenerateContent.short_description)
+                    .setImageStyle(CardService.ImageStyle.SQUARE)
+                    .setImageUrl(Addon.GenerateContent.imageUrl)
+                    .setImageAltText(Addon.GenerateContent.name + ' Logo'));
+
+            // Add a section with a text input for the prompt and a button to generate content
+            const inputSection = CardService.newCardSection()
+                .setHeader('📝 Input Prompt')
+                .addWidget(
+                    CardService.newTextInput()
+                        //.setVisibility(hidden ? CardService.Visibility.HIDDEN : CardService.Visibility.VISIBLE)
+                        .setValue(data.prompt || '')
+                        .setId(Addon.PROPERTIES.prompt_text_input)
+                        .setFieldName(Addon.PROPERTIES.prompt_text_input)
+                        .setTitle('📝 Your Prompt')
+                        .setHint('Enter your prompt for the AI model, for example: "Write a poem about a sunset."')
+                )
+                .addWidget(
+                    CardService.newTextButton()
+                        .setText('Generate Content')
+                        .setOnClickAction(
+                            CardService.newAction()
+                                .setFunctionName('Addon.GenerateContent.Controller.GenerateContent')
+                                .setParameters({ ...data, update: 'true' })
+                        )
+                );
+
+            cardBuilder.addSection(inputSection);
+            return cardBuilder.build();
         }
     }
 };
