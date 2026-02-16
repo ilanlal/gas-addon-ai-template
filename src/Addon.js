@@ -14,14 +14,14 @@ class Addon {
 };
 
 Addon.Media = {
-    DEFAULT_IMAGE_URL: 'https://raw.githubusercontent.com/ilanlal/ss-json-editor/refs/heads/main/assets/logo24.png',
-    WELCOME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/ss-json-editor/refs/heads/main/assets/logo24.png',
-    YOU_GOT_IT_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/telegram-bot-studio/main/assets/bitmoji-you-got-it.webp',
-    BIG_TIME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/telegram-bot-studio/main/assets/bitmoji-big-time.webp',
-    I_AM_THINKING_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/telegram-bot-studio/main/assets/bitmoji-i-am-thinking.webp',
-    YES_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/telegram-bot-studio/main/assets/bitmoji-yes.webp',
-    PAY_ATTENTION_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/telegram-bot-studio/main/assets/bitmoji-pay-attention.webp',
-    LOGO_PNG_URL: 'https://raw.githubusercontent.com/ilanlal/ss-json-editor/refs/heads/main/assets/logo24.png'
+    DEFAULT_IMAGE_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/logo24.png',
+    WELCOME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/logo24.png',
+    YOU_GOT_IT_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-you-got-it.webp',
+    BIG_TIME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-big-time.webp',
+    I_AM_THINKING_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-i-am-thinking.webp',
+    YES_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-yes.webp',
+    PAY_ATTENTION_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-pay-attention.webp',
+    LOGO_PNG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/logo24.png'
 };
 
 Addon.Package = {
@@ -33,7 +33,7 @@ Addon.Package = {
     author: 'Ilan Laloum',
     license: 'MIT',
     imageUrl: Addon.Media.LOGO_PNG_URL,
-    gitRepository: 'https://github.com/ilanlal/ss-json-editor'
+    gitRepository: 'https://github.com/ilanlal/gas-addon-ai-template'
 };
 
 Addon.PROPERTIES = {
@@ -1585,7 +1585,7 @@ Addon.GenerateContent = {
                 };
                 const content = Addon.Modules.GeminiAPI.generateContent(gemini_api_key, geminiModel, payload);
                 // Insert generated content into Terminal Sheet
-                Addon.Modules.TerminalOutput.write(activeSpreadsheet, source, 'GeminiAPI Response', JSON.stringify(e), JSON.stringify(payload), JSON.stringify(content), geminiModel);
+                Addon.Modules.TerminalOutput.write(activeSpreadsheet, source, 'GeminiAPI Response', e, JSON.stringify(payload), JSON.stringify(content), geminiModel);
 
                 // Return action response with notification
                 return CardService.newActionResponseBuilder()
@@ -1595,11 +1595,11 @@ Addon.GenerateContent = {
                     .build();
             }
             catch (error) {
-                Addon.Modules.TerminalOutput.write(activeSpreadsheet, source, 'Error', JSON.stringify(e), error.toString());
+                Addon.Modules.TerminalOutput.write(activeSpreadsheet, source, 'Error', e, error.toString());
                 return CardService.newActionResponseBuilder()
                     .setNotification(
                         CardService.newNotification()
-                            .setText(`❌ Error during Beautify: ${error.message}`))
+                            .setText(`❌ Error generating content: ${error.toString()}`))
                     .build();
             }
         }
