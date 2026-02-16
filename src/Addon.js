@@ -211,7 +211,7 @@ Addon.Modules = {
                 .getProperty('focus_terminal_output') || 'OFF';
 
             if (terminalOutputEnabled !== 'ON') {
-                return;
+                //return;
             }
 
             const sheet = Addon.Modules.Sheet
@@ -448,34 +448,6 @@ Addon.Home = {
                         .pushCard(Addon.Home.View.HelpCard({ ...appModelData }))
                 ).build();
         },
-        GenerateContent: (e) => {
-            const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-
-            try {
-                const formInputs = e?.commonEventObject?.formInputs || {};
-
-                // Read settings from properties
-                const indentationSpaces = formInputs?.[Addon.PROPERTIES.indentation_spaces]?.stringInputs?.value[0] || "2";
-                PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.indentation_spaces, indentationSpaces);
-
-                // show_errors_switch
-                const showErrorsState = formInputs?.[Addon.PROPERTIES.show_errors_switch]?.stringInputs?.value[0] || "OFF";
-                PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.show_errors_switch, showErrorsState);
-
-                // ignore_whitespace_switch
-                const ignoreWhitespaceState = PropertiesService.getUserProperties().getProperty(Addon.PROPERTIES.ignore_whitespace_switch) || 'ON';
-
-                const result = Addon.Modules.JsonStudio.beautifyActiveRange(activeSpreadsheet, parseInt(indentationSpaces, 10), ignoreWhitespaceState === 'ON');
-                return Addon.Home.Controller._HandleResultNavigation(e, result);
-            }
-            catch (error) {
-                return CardService.newActionResponseBuilder()
-                    .setNotification(
-                        CardService.newNotification()
-                            .setText(`Error during Beautify: ${error.message}`))
-                    .build();
-            }
-        },
         Minify: (e) => {
             const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
             try {
@@ -704,9 +676,14 @@ Addon.Home = {
         },
         _BuildPluginHubSection: (data = {}) => {
             const listOfTools = [
-                { name: 'Generate Content', description: 'Create new content using AI.', icon: 'auto_awesome', action: 'GenerateContent' },
-                { name: 'Minify', description: 'Compress your JSON data for efficient storage.', icon: 'compress', action: 'Minify' },
-                { name: 'Validate', description: 'Check your JSON data for errors.', icon: 'check_circle', action: 'Validate' }
+                { name: 'Generate Content', emoji: '🎨', description: 'Create new content using AI.', icon: 'auto_awesome', action: 'Addon.GenerateContent.Controller.Load' },
+                { name: 'Images', emoji: '🖼️', description: 'Create images from text prompts using AI.', icon: 'image', action: 'Addon.GenerateImages.Controller.Load' },
+                { name: 'Text', emoji: '✍️', description: 'Generate text based on prompts using AI.', icon: 'text_fields', action: 'Addon.TextGeneration.Controller.Load' },
+                { name: 'Video', emoji: '🎬', description: 'Create videos from text prompts using AI.', icon: 'videocam', action: 'Addon.GenerateVideo.Controller.Load' },
+                { name: 'Data Analysis', emoji: '📊', description: 'Analyze and visualize data with AI insights.', icon: 'analytics', action: 'Addon.DataAnalysis.Controller.Load' },
+                { name: 'Trend Prediction', emoji: '📈', description: 'Predict trends and outcomes using AI models.', icon: 'trending_up', action: 'Addon.TrendPrediction.Controller.Load' },
+                { name: 'Code Generation', emoji: '🧑‍💻', description: 'Generate code snippets based on descriptions using AI.', icon: 'code', action: 'Addon.CodeGeneration.Controller.Load' },
+                { name: 'Content Summarization', emoji: '∑', description: 'Summarize long content into concise summaries using AI.', icon: 'summarize', action: 'Addon.ContentSummarization.Controller.Load' },
             ];
             const pluginHub = CardService.newCardSection()
                 .setHeader('🛠️ Available Tools')
@@ -718,7 +695,7 @@ Addon.Home = {
             // Add each tool as a decorated text with an action button
             listOfTools.forEach(tool => {
                 const decoratedText = CardService.newDecoratedText()
-                    .setTopLabel(`🎨 ${tool.name}`)
+                    .setText(`${tool.emoji} ${tool.name}`)
                     .setBottomLabel(tool.description)
                     .setWrapText(true)
                     .setButton(
@@ -733,7 +710,7 @@ Addon.Home = {
                             )
                             .setOnClickAction(
                                 CardService.newAction()
-                                    .setFunctionName(`Addon.Home.Controller.${tool.action}`)
+                                    .setFunctionName(`${tool.action}`)
                             )
                     );
 
@@ -1519,7 +1496,7 @@ Addon.GenerateContent = {
                 const appModelData = Addon.Modules.App.getData();
 
                 // Build and return the Home Card
-                const card = Addon.GenerateContent.View.HomeCard({ ...appModelData });
+                const card = Addon.GenerateContent.View.HomeCard(appModelData);
 
                 let cardNavigation = null;
 
@@ -1556,8 +1533,8 @@ Addon.GenerateContent = {
             const source = 'Addon.GenerateContent';
             try {
                 const prompt = data[Addon.PROPERTIES.prompt_text_input] || '';
-                const geminiModel = data[Addon.PROPERTIES.gemini_model_selector] || 'gemini-1.5-pro';
-                const gemini_api_key = PropertiesService.getUserProperties().getProperty(Addon.PROPERTIES.gemini_api_key) || '[YOUR_API_KEY]';
+                const geminiModel = data[Addon.PROPERTIES.gemini_model_selector] || 'gemini-3-flash-preview';
+                const gemini_api_key = PropertiesService.getScriptProperties().getProperty(Addon.PROPERTIES.gemini_api_key) || '[YOUR_API_KEY]';
                 const generationConfig = {
                     thinkingConfig: {
                         thinkingLevel: 'low'
@@ -1633,7 +1610,7 @@ Addon.GenerateContent = {
                         .setOnClickAction(
                             CardService.newAction()
                                 .setFunctionName('Addon.GenerateContent.Controller.GenerateContent')
-                                .setParameters({ ...data, update: 'true' })
+                                .setParameters({ update: 'true' })
                         )
                 );
 

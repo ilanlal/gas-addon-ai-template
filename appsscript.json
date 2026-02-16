@@ -8,7 +8,8 @@
   },
   "oauthScopes": [
     "https://www.googleapis.com/auth/script.locale",
-    "https://www.googleapis.com/auth/spreadsheets.currentonly"
+    "https://www.googleapis.com/auth/spreadsheets.currentonly",
+    "https://www.googleapis.com/auth/script.external_request"
   ],
   "urlFetchWhitelist": [
     "https://generativelanguage.googleapis.com/"
@@ -18,8 +19,8 @@
       "name": "AI Studio",
       "logoUrl": "https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/icons/48x48.ico",
       "layoutProperties": {
-        "primaryColor": "#88001b",
-        "secondaryColor": "#1010ff"
+        "primaryColor": "#1010ff",
+        "secondaryColor": "#88001b"
       },
       "openLinkUrlPrefixes": [
         "https://raw.githubusercontent.com/ilanlal/",
