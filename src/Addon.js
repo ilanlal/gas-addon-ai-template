@@ -37,6 +37,18 @@ Addon.Package = {
 };
 
 Addon.PROPERTIES = {
+    get responseMimeType_selector() {
+        return 'responseMimeType_selector';
+    },
+    get topP_text_input() {
+        return 'top_p_text_input';
+    },
+    get topK_text_input() {
+        return 'top_k_text_input';
+    },
+    get temperature_text_input() {
+        return 'temperature_text_input';
+    },
     get indentation_spaces() {
         return 'indentation_spaces';
     },
@@ -195,12 +207,12 @@ Addon.Modules = {
         static get SHEET_META() {
             return {
                 name: '💻 Terminal Output',
-                columns: ['Timestamp', 'Source', 'Message', 'Event Object', 'More Info']
+                columns: ['Timestamp', 'Source', 'Message', 'Event Object', 'Payload', 'Response', 'Details']
             };
         }
 
         static write(
-            activeSpreadsheet, source, message, e, param1, param2, param3) {
+            activeSpreadsheet, source, message, e, payload, response, details) {
 
             // Check if terminal output is enabled
             const terminalOutputEnabled = PropertiesService.getUserProperties()
@@ -226,10 +238,12 @@ Addon.Modules = {
                 (typeof message === 'object' || Array.isArray(message)) ? JSON.stringify(message) : String(message || ''),
                 // Event Object
                 (typeof e === 'object' || Array.isArray(e)) ? JSON.stringify(e) : String(e || ''),
-                // Details 
-                (typeof param1 === 'object' || Array.isArray(param1)) ? JSON.stringify(param1) : String(param1 || ''),
-                (typeof param2 === 'object' || Array.isArray(param2)) ? JSON.stringify(param2) : String(param2 || ''),
-                (typeof param3 === 'object' || Array.isArray(param3)) ? JSON.stringify(param3) : String(param3 || '')
+                // Payload
+                (typeof payload === 'object' || Array.isArray(payload)) ? JSON.stringify(payload) : String(payload || ''),
+                // Response
+                (typeof response === 'object' || Array.isArray(response)) ? JSON.stringify(response) : String(response || ''),
+                // Details
+                (typeof details === 'object' || Array.isArray(details)) ? JSON.stringify(details) : String(details || '')
             ]);
 
             // Focus the last row if enabled
@@ -359,13 +373,7 @@ Addon.Modules = {
     GeminiAPI: class {
         static get MODELS() {
             return {
-                'gemini-3-flash-preview': 'gemini-3-flash-preview',
-                'gemini-3-flash': 'gemini-3-flash',
-                'gemini-3': 'gemini-3',
-                'gemini-2.5-pro': 'gemini-2.5-pro',
-                'gemini-2.5': 'gemini-2.5',
-                'gemini-2.0-pro': 'gemini-2.0-pro',
-                'gemini-2.0': 'gemini-2.0'
+                'gemini-3-flash-preview': 'gemini-3-flash-preview'
             };
         }
 
@@ -1529,25 +1537,39 @@ Addon.GenerateContent = {
         },
         GenerateContent: (e) => {
             const activeSpreadsheet = SpreadsheetApp.getActiveSpreadsheet();
-            const data = e?.commonEventObject?.parameters || {};
             const source = 'Addon.GenerateContent';
             try {
-                const prompt = data[Addon.PROPERTIES.prompt_text_input] || '';
-                const geminiModel = data[Addon.PROPERTIES.gemini_model_selector] || 'gemini-3-flash-preview';
+                const prompt = e?.commonEventObject
+                    ?.formInputs?.[Addon.PROPERTIES.prompt_text_input]
+                    ?.stringInputs?.value[0] || 'Hello, world!';
+                const geminiModel = e?.commonEventObject
+                    ?.formInputs?.[Addon.PROPERTIES.gemini_model_selector]
+                    ?.stringInputs?.value[0] || 'gemini-3-flash-preview';
+                const temperature = parseFloat(e?.commonEventObject
+                    ?.formInputs?.[Addon.PROPERTIES.temperature_text_input]
+                    ?.stringInputs?.value[0] || '1');
+                const topP = parseFloat(e?.commonEventObject
+                    ?.formInputs?.[Addon.PROPERTIES.topP_text_input]
+                    ?.stringInputs?.value[0] || '0.95');
+                const topK = parseInt(e?.commonEventObject
+                    ?.formInputs?.[Addon.PROPERTIES.topK_text_input]
+                    ?.stringInputs?.value[0] || '40', 10);
+                const responseMimeType = e?.commonEventObject?.formInputs?.[Addon.PROPERTIES.responseMimeType_selector]
+                    ?.stringInputs?.value[0] || 'text/plain';
                 const gemini_api_key = PropertiesService.getScriptProperties().getProperty(Addon.PROPERTIES.gemini_api_key) || '[YOUR_API_KEY]';
                 const generationConfig = {
                     thinkingConfig: {
                         thinkingLevel: 'low'
                     },
-                    temperature: 1,
-                    topP: 0.95,
-                    topK: 40,
-                    responseMimeType: 'text/plain'
+                    temperature: temperature,
+                    topP: topP,
+                    topK: topK,
+                    responseMimeType: responseMimeType
                 };
 
                 const systemInstruction = {
                     parts: [{
-                        text: 'You are a cat. Your name is Neko.'
+                        text: prompt
                     }]
                 };
 
@@ -1562,7 +1584,14 @@ Addon.GenerateContent = {
                 };
                 const content = Addon.Modules.GeminiAPI.generateContent(gemini_api_key, geminiModel, payload);
                 // Insert generated content into Terminal Sheet
-                Addon.Modules.TerminalOutput.write(activeSpreadsheet, source, 'GeminiAPI Response', e, JSON.stringify(payload), JSON.stringify(content), geminiModel);
+                Addon.Modules.TerminalOutput.write(
+                    activeSpreadsheet,
+                    source,
+                    payload.contents[0].parts[0].text,
+                    e,
+                    JSON.stringify(payload),
+                    JSON.stringify(content),
+                    content.candidates[0].content.parts[0].text);
 
                 // Return action response with notification
                 return CardService.newActionResponseBuilder()
@@ -1594,25 +1623,89 @@ Addon.GenerateContent = {
 
             // Add a section with a text input for the prompt and a button to generate content
             const inputSection = CardService.newCardSection()
-                .setHeader('📝 Input Prompt')
+                // Add a multiline text input for the prompt with a default value and a hint
                 .addWidget(
                     CardService.newTextInput()
                         //.setVisibility(hidden ? CardService.Visibility.HIDDEN : CardService.Visibility.VISIBLE)
-                        .setValue(data.prompt || '')
+                        .setValue(data.prompt || 'You are a cat. Your name is Neko. Write a short poem about your day.')
                         .setId(Addon.PROPERTIES.prompt_text_input)
                         .setFieldName(Addon.PROPERTIES.prompt_text_input)
                         .setTitle('📝 Your Prompt')
                         .setHint('Enter your prompt for the AI model, for example: "Write a poem about a sunset."')
-                )
-                .addWidget(
-                    CardService.newTextButton()
-                        .setText('Generate Content')
-                        .setOnClickAction(
-                            CardService.newAction()
-                                .setFunctionName('Addon.GenerateContent.Controller.GenerateContent')
-                                .setParameters({ update: 'true' })
-                        )
+                        .setMultiline(true)
                 );
+
+            // Add a dropdown to select the Gemini model
+            const geminiModelSelector =
+                CardService.newSelectionInput()
+                    .setType(CardService.SelectionInputType.DROPDOWN)
+                    // Enable for premium users
+                    .setTitle('🤖 Gemini Model')
+                    .setFieldName(Addon.PROPERTIES.gemini_model_selector);
+            // Add available Gemini models as options
+            const geminiModels = Addon.Modules.GeminiAPI.MODELS;
+            // Loop through the models and add them as options to the selector
+            for (const modelKey in geminiModels) {
+                if (geminiModels.hasOwnProperty(modelKey)) {
+                    const modelName = geminiModels[modelKey];
+                    geminiModelSelector.addItem(modelName, modelKey, data.gemini_model_selector === modelKey);
+                }
+            }
+
+            // Add the selection input to the card section
+            inputSection.addWidget(geminiModelSelector);
+
+            // Add temperature text input (number input with step of 0.1) for content generation creativity control
+            inputSection.addWidget(
+                CardService.newTextInput()
+                    .setValue(data.temperature_text_input || '1')
+                    .setId(Addon.PROPERTIES.temperature_text_input)
+                    .setFieldName(Addon.PROPERTIES.temperature_text_input)
+                    .setTitle('🌡️ Temperature')
+                    .setHint('Enter a value between 0 and 1. Controls the randomness of the output.')
+            );
+
+            // topP: Optional. The maximum cumulative probability of tokens to consider when sampling.
+            inputSection.addWidget(
+                CardService.newTextInput()
+                    .setValue(data.topP_text_input || '1')
+                    .setId(Addon.PROPERTIES.topP_text_input)
+                    .setFieldName(Addon.PROPERTIES.topP_text_input)
+                    .setTitle('🎯 Top P')
+                    .setHint('Enter a top P value (e.g., 0.9). The maximum cumulative probability of tokens to consider when sampling.')
+            );
+
+            // topK: Optional. The maximum number of tokens to consider when sampling.
+            inputSection.addWidget(
+                CardService.newTextInput()
+                    .setValue(data.topK_text_input || '40')
+                    .setId(Addon.PROPERTIES.topK_text_input)
+                    .setFieldName(Addon.PROPERTIES.topK_text_input)
+                    .setTitle('🎯 Top K')
+                    .setHint('Enter a top K value (e.g., 40). The maximum number of tokens to consider when sampling.')
+            );
+
+            // responseMimeType selector for output format control (e.g., text/plain, application/json)
+            inputSection.addWidget(
+                CardService.newSelectionInput()
+                    .setType(CardService.SelectionInputType.DROPDOWN)
+                    .setTitle('📄 Response Format')
+                    .setFieldName(Addon.PROPERTIES.responseMimeType_selector)
+                    .addItem('Text', 'text/plain', data.responseMimeType_selector === 'text/plain')
+                    .addItem('JSON', 'application/json', data.responseMimeType_selector === 'application/json')
+                    .addItem('ENUM', 'text/x.enum', data.responseMimeType_selector === 'text/x.enum')
+            );
+
+            // Add the generate button
+            inputSection.addWidget(
+                CardService.newTextButton()
+                    .setText('Generate Content')
+                    .setOnClickAction(
+                        CardService.newAction()
+                            .setFunctionName('Addon.GenerateContent.Controller.GenerateContent')
+                            .setParameters({ update: 'true' })
+                    )
+            );
 
             cardBuilder.addSection(inputSection);
             return cardBuilder.build();
