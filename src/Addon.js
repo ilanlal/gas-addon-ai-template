@@ -207,12 +207,12 @@ Addon.Modules = {
         static get SHEET_META() {
             return {
                 name: '💻 Terminal Output',
-                columns: ['Timestamp', 'Source', 'Message', 'Event Object', 'Payload', 'Response', 'Details']
+                columns: ['Timestamp', 'Model Version', 'Event Object', 'Payload', 'Response', 'Prompt', 'Generated Text', 'Total Token Count', 'Prompt Token Count', 'Thoughts Token Count']
             };
         }
 
         static write(
-            activeSpreadsheet, source, message, e, payload, response, details) {
+            activeSpreadsheet, e, payload, response) {
 
             // Check if terminal output is enabled
             const terminalOutputEnabled = PropertiesService.getUserProperties()
@@ -232,18 +232,24 @@ Addon.Modules = {
             sheet.appendRow([
                 // Created On as iso string
                 new Date().toISOString(),
-                // source
-                source, // chat side
-                // Message
-                (typeof message === 'object' || Array.isArray(message)) ? JSON.stringify(message) : String(message || ''),
+                // Model Version (if available in response, otherwise use input model or default to 'unknown')
+                response?.modelVersion || 'unknown',
                 // Event Object
                 (typeof e === 'object' || Array.isArray(e)) ? JSON.stringify(e) : String(e || ''),
                 // Payload
                 (typeof payload === 'object' || Array.isArray(payload)) ? JSON.stringify(payload) : String(payload || ''),
                 // Response
                 (typeof response === 'object' || Array.isArray(response)) ? JSON.stringify(response) : String(response || ''),
-                // Details
-                (typeof details === 'object' || Array.isArray(details)) ? JSON.stringify(details) : String(details || '')
+                // Prompt (if available in payload)
+                payload?.contents?.[0]?.parts?.[0]?.text || '',
+                // Generated Text (if available in response) ({"candidates":[{"content":{"parts":[{"text": "generated text here"}]}}]})
+                response?.candidates?.[0]?.content?.parts?.[0]?.text || '',
+                // Total Token Count (if available in response.usageMetadata)
+                response?.usageMetadata?.totalTokenCount || 0,
+                // Prompt Token Count (if available in response.usageMetadata)
+                response?.usageMetadata?.promptTokenCount || 0,
+                // Thoughts Token Count (if available in response.usageMetadata)
+                response?.usageMetadata?.thoughtsTokenCount || 0
             ]);
 
             // Focus the last row if enabled
@@ -253,7 +259,7 @@ Addon.Modules = {
 
             // Set active selection to the last row
             const lastRow = sheet.getLastRow();
-            const lastRowA1Notation = `A${lastRow}:G${lastRow}`;
+            const lastRowA1Notation = `A${lastRow}:H${lastRow}`;
             sheet.setActiveSelection(lastRowA1Notation);
             return sheet;
         }
@@ -1584,14 +1590,7 @@ Addon.GenerateContent = {
                 };
                 const content = Addon.Modules.GeminiAPI.generateContent(gemini_api_key, geminiModel, payload);
                 // Insert generated content into Terminal Sheet
-                Addon.Modules.TerminalOutput.write(
-                    activeSpreadsheet,
-                    source,
-                    payload.contents[0].parts[0].text,
-                    e,
-                    JSON.stringify(payload),
-                    JSON.stringify(content),
-                    content.candidates[0].content.parts[0].text);
+                Addon.Modules.TerminalOutput.write(activeSpreadsheet, e, payload, content);
 
                 // Return action response with notification
                 return CardService.newActionResponseBuilder()
@@ -1601,7 +1600,7 @@ Addon.GenerateContent = {
                     .build();
             }
             catch (error) {
-                Addon.Modules.TerminalOutput.write(activeSpreadsheet, source, 'Error', e, error.toString());
+                Addon.Modules.TerminalOutput.write(activeSpreadsheet, e, 'Error', error.toString());
                 return CardService.newActionResponseBuilder()
                     .setNotification(
                         CardService.newNotification()
