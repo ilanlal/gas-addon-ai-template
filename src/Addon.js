@@ -14,14 +14,14 @@ class Addon {
 };
 
 Addon.Media = {
-    DEFAULT_IMAGE_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/logo24.png',
+    DEFAULT_IMAGE_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/icons/32x32.ico',
     WELCOME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/logo24.png',
     YOU_GOT_IT_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-you-got-it.webp',
     BIG_TIME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-big-time.webp',
     I_AM_THINKING_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-i-am-thinking.webp',
     YES_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-yes.webp',
     PAY_ATTENTION_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-pay-attention.webp',
-    LOGO_PNG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/logo24.png'
+    LOGO_PNG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/icons/32x32.ico'
 };
 
 Addon.Package = {
