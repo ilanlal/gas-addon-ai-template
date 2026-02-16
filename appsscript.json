@@ -16,7 +16,7 @@
   "addOns": {
     "common": {
       "name": "AI Studio",
-      "logoUrl": "https://raw.githubusercontent.com/ilanlal/ss-json-editor/refs/heads/main/assets/logo24.png",
+      "logoUrl": "https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/icons/48x48.ico",
       "layoutProperties": {
         "primaryColor": "#88001b",
         "secondaryColor": "#1010ff"
