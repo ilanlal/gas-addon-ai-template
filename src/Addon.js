@@ -218,11 +218,11 @@ Addon.Modules = {
 
             // Check if terminal output is enabled
             const terminalOutputEnabled = PropertiesService.getUserProperties()
-                .getProperty('terminal_output_switch') || 'ON';
+                .getProperty(Addon.PROPERTIES.terminal_output_switch) || 'ON';
 
             // Check if terminal output is enabled
             const focusTerminalOutput = PropertiesService.getUserProperties()
-                .getProperty('focus_terminal_output') || 'ON';
+                .getProperty(Addon.PROPERTIES.focus_terminal_output) || 'ON';
 
             if (terminalOutputEnabled !== 'ON') {
                 return;
@@ -230,6 +230,75 @@ Addon.Modules = {
 
             const sheet = Addon.Modules.Sheet
                 .getSheet(activeSpreadsheet, Addon.Modules.TerminalOutput.SHEET_META);
+
+            sheet.appendRow([
+                // Created On as iso string
+                new Date().toISOString(),
+                // Prompt (if available in payload)
+                payload?.contents?.[0]?.parts?.[0]?.text || '',
+                // Generated Text (if available in response) ({"candidates":[{"content":{"parts":[{"text": "generated text here"}]}}]})
+                response?.candidates?.[0]?.content?.parts?.[0]?.text || '',
+                // Model Version (if available in response, otherwise use input model or default to 'unknown')
+                response?.modelVersion || 'unknown',
+                // Event Object
+                (typeof e === 'object' || Array.isArray(e)) ? JSON.stringify(e) : String(e || ''),
+                // Payload
+                (typeof payload === 'object' || Array.isArray(payload)) ? JSON.stringify(payload) : String(payload || ''),
+                // Response
+                (typeof response === 'object' || Array.isArray(response)) ? JSON.stringify(response) : String(response || ''),
+                // Total Token Count (if available in response.usageMetadata)
+                response?.usageMetadata?.totalTokenCount || 0,
+                // Prompt Token Count (if available in response.usageMetadata)
+                response?.usageMetadata?.promptTokenCount || 0,
+                // Thoughts Token Count (if available in response.usageMetadata)
+                response?.usageMetadata?.thoughtsTokenCount || 0,
+                // cachedContentTokenCount (if available in response.usageMetadata)
+                response?.usageMetadata?.cachedContentTokenCount || 0,
+                // candidatesTokenCount (if available in response.usageMetadata)
+                response?.usageMetadata?.candidatesTokenCount || 0,
+                // toolUsePromptTokenCount (if available in response.usageMetadata)
+                response?.usageMetadata?.toolUsePromptTokenCount || 0
+            ]);
+
+            // Focus the last row if enabled
+            if (focusTerminalOutput !== 'ON') {
+                return sheet;
+            }
+
+            // Set active selection to the last row
+            const lastRow = sheet.getLastRow();
+            const lastRowA1Notation = `A${lastRow}:${sheet.getLastColumn()}${lastRow}`;
+            sheet.setActiveSelection(lastRowA1Notation);
+            return sheet;
+        }
+    },
+    GeminiConsole: class {
+        static get SHEET_META() {
+            return {
+                name: '💻 Gemini Console',
+                columns: ['Timestamp', 'Prompt', 'Generated Text', 'Model Version',
+                    'Event Object', 'Payload', 'Response', 'Total Token Count', 'Prompt Token Count', 'Thoughts Token Count',
+                    'Cached Content Token Count', 'Candidates Token Count', 'Tool Use Prompt Token Count']
+            };
+        }
+
+        static write(
+            activeSpreadsheet, e, payload, response) {
+
+            // Check if terminal output is enabled
+            const terminalOutputEnabled = PropertiesService.getUserProperties()
+                .getProperty(Addon.PROPERTIES.terminal_output_switch) || 'ON';
+
+            // Check if terminal output is enabled
+            const focusTerminalOutput = PropertiesService.getUserProperties()
+                .getProperty(Addon.PROPERTIES.focus_terminal_output) || 'ON';
+
+            if (terminalOutputEnabled !== 'ON') {
+                return;
+            }
+
+            const sheet = Plugins.Modules.Sheet
+                .getSheet(activeSpreadsheet, Plugins.Modules.GeminiConsole.SHEET_META);
 
             sheet.appendRow([
                 // Created On as iso string
