@@ -207,7 +207,9 @@ Addon.Modules = {
         static get SHEET_META() {
             return {
                 name: '💻 Terminal Output',
-                columns: ['Timestamp', 'Model Version', 'Event Object', 'Payload', 'Response', 'Prompt', 'Generated Text', 'Total Token Count', 'Prompt Token Count', 'Thoughts Token Count']
+                columns: ['Timestamp', 'Prompt', 'Generated Text', 'Model Version',
+                    'Event Object', 'Payload', 'Response', 'Total Token Count', 'Prompt Token Count', 'Thoughts Token Count',
+                    'Cached Content Token Count', 'Candidates Token Count', 'Tool Use Prompt Token Count']
             };
         }
 
@@ -216,14 +218,14 @@ Addon.Modules = {
 
             // Check if terminal output is enabled
             const terminalOutputEnabled = PropertiesService.getUserProperties()
-                .getProperty('terminal_output_switch') || 'OFF';
+                .getProperty('terminal_output_switch') || 'ON';
 
             // Check if terminal output is enabled
             const focusTerminalOutput = PropertiesService.getUserProperties()
-                .getProperty('focus_terminal_output') || 'OFF';
+                .getProperty('focus_terminal_output') || 'ON';
 
             if (terminalOutputEnabled !== 'ON') {
-                //return;
+                return;
             }
 
             const sheet = Addon.Modules.Sheet
@@ -232,6 +234,10 @@ Addon.Modules = {
             sheet.appendRow([
                 // Created On as iso string
                 new Date().toISOString(),
+                // Prompt (if available in payload)
+                payload?.contents?.[0]?.parts?.[0]?.text || '',
+                // Generated Text (if available in response) ({"candidates":[{"content":{"parts":[{"text": "generated text here"}]}}]})
+                response?.candidates?.[0]?.content?.parts?.[0]?.text || '',
                 // Model Version (if available in response, otherwise use input model or default to 'unknown')
                 response?.modelVersion || 'unknown',
                 // Event Object
@@ -240,16 +246,18 @@ Addon.Modules = {
                 (typeof payload === 'object' || Array.isArray(payload)) ? JSON.stringify(payload) : String(payload || ''),
                 // Response
                 (typeof response === 'object' || Array.isArray(response)) ? JSON.stringify(response) : String(response || ''),
-                // Prompt (if available in payload)
-                payload?.contents?.[0]?.parts?.[0]?.text || '',
-                // Generated Text (if available in response) ({"candidates":[{"content":{"parts":[{"text": "generated text here"}]}}]})
-                response?.candidates?.[0]?.content?.parts?.[0]?.text || '',
                 // Total Token Count (if available in response.usageMetadata)
                 response?.usageMetadata?.totalTokenCount || 0,
                 // Prompt Token Count (if available in response.usageMetadata)
                 response?.usageMetadata?.promptTokenCount || 0,
                 // Thoughts Token Count (if available in response.usageMetadata)
-                response?.usageMetadata?.thoughtsTokenCount || 0
+                response?.usageMetadata?.thoughtsTokenCount || 0,
+                // cachedContentTokenCount (if available in response.usageMetadata)
+                response?.usageMetadata?.cachedContentTokenCount || 0,
+                // candidatesTokenCount (if available in response.usageMetadata)
+                response?.usageMetadata?.candidatesTokenCount || 0,
+                // toolUsePromptTokenCount (if available in response.usageMetadata)
+                response?.usageMetadata?.toolUsePromptTokenCount || 0
             ]);
 
             // Focus the last row if enabled
@@ -259,7 +267,7 @@ Addon.Modules = {
 
             // Set active selection to the last row
             const lastRow = sheet.getLastRow();
-            const lastRowA1Notation = `A${lastRow}:H${lastRow}`;
+            const lastRowA1Notation = `A${lastRow}:${sheet.getLastColumn()}${lastRow}`;
             sheet.setActiveSelection(lastRowA1Notation);
             return sheet;
         }
@@ -691,13 +699,13 @@ Addon.Home = {
         _BuildPluginHubSection: (data = {}) => {
             const listOfTools = [
                 { name: 'Generate Content', emoji: '🎨', description: 'Create new content using AI.', icon: 'auto_awesome', action: 'Addon.GenerateContent.Controller.Load' },
-                { name: 'Images', emoji: '🖼️', description: 'Create images from text prompts using AI.', icon: 'image', action: 'Addon.GenerateImages.Controller.Load' },
-                { name: 'Text', emoji: '✍️', description: 'Generate text based on prompts using AI.', icon: 'text_fields', action: 'Addon.TextGeneration.Controller.Load' },
-                { name: 'Video', emoji: '🎬', description: 'Create videos from text prompts using AI.', icon: 'videocam', action: 'Addon.GenerateVideo.Controller.Load' },
-                { name: 'Data Analysis', emoji: '📊', description: 'Analyze and visualize data with AI insights.', icon: 'analytics', action: 'Addon.DataAnalysis.Controller.Load' },
-                { name: 'Trend Prediction', emoji: '📈', description: 'Predict trends and outcomes using AI models.', icon: 'trending_up', action: 'Addon.TrendPrediction.Controller.Load' },
-                { name: 'Code Generation', emoji: '🧑‍💻', description: 'Generate code snippets based on descriptions using AI.', icon: 'code', action: 'Addon.CodeGeneration.Controller.Load' },
-                { name: 'Content Summarization', emoji: '∑', description: 'Summarize long content into concise summaries using AI.', icon: 'summarize', action: 'Addon.ContentSummarization.Controller.Load' },
+                { name: 'Webhook', emoji: '🔗', description: 'Telegram webhook integration.', icon: 'link', action: 'Addon.GenerateImages.Controller.Load' },
+                //{ name: 'Text', emoji: '✍️', description: 'Generate text based on prompts using AI.', icon: 'text_fields', action: 'Addon.TextGeneration.Controller.Load' },
+                //{ name: 'Video', emoji: '🎬', description: 'Create videos from text prompts using AI.', icon: 'videocam', action: 'Addon.GenerateVideo.Controller.Load' },
+                //{ name: 'Data Analysis', emoji: '📊', description: 'Analyze and visualize data with AI insights.', icon: 'analytics', action: 'Addon.DataAnalysis.Controller.Load' },
+                //{ name: 'Trend Prediction', emoji: '📈', description: 'Predict trends and outcomes using AI models.', icon: 'trending_up', action: 'Addon.TrendPrediction.Controller.Load' },
+                //{ name: 'Code Generation', emoji: '🧑‍💻', description: 'Generate code snippets based on descriptions using AI.', icon: 'code', action: 'Addon.CodeGeneration.Controller.Load' },
+                //{ name: 'Content Summarization', emoji: '∑', description: 'Summarize long content into concise summaries using AI.', icon: 'summarize', action: 'Addon.ContentSummarization.Controller.Load' },
             ];
             const pluginHub = CardService.newCardSection()
                 .setHeader('🛠️ Available Tools')
@@ -1508,6 +1516,12 @@ Addon.GenerateContent = {
 
                 // Build and return the Home Card
                 const appModelData = Addon.Modules.App.getData();
+                appModelData.prompt_text_input = 'You are a cat. \nYour name is Neko. \nWrite a short poem about your day.';
+                appModelData.gemini_model_selector = 'gemini-3-flash-preview';
+                appModelData.temperature_text_input = 1;
+                appModelData.topP_text_input = 0.95;
+                appModelData.topK_text_input = 40;
+                appModelData.responseMimeType_selector = 'text/plain';
 
                 // Build and return the Home Card
                 const card = Addon.GenerateContent.View.HomeCard(appModelData);
@@ -1622,17 +1636,20 @@ Addon.GenerateContent = {
 
             // Add a section with a text input for the prompt and a button to generate content
             const inputSection = CardService.newCardSection()
-                // Add a multiline text input for the prompt with a default value and a hint
-                .addWidget(
-                    CardService.newTextInput()
-                        //.setVisibility(hidden ? CardService.Visibility.HIDDEN : CardService.Visibility.VISIBLE)
-                        .setValue(data.prompt || 'You are a cat. Your name is Neko. Write a short poem about your day.')
-                        .setId(Addon.PROPERTIES.prompt_text_input)
-                        .setFieldName(Addon.PROPERTIES.prompt_text_input)
-                        .setTitle('📝 Your Prompt')
-                        .setHint('Enter your prompt for the AI model, for example: "Write a poem about a sunset."')
-                        .setMultiline(true)
-                );
+                .setCollapsible(true)
+                .setNumUncollapsibleWidgets(3);
+
+            // Add a multiline text input for the prompt with a default value and a hint
+            inputSection.addWidget(
+                CardService.newTextInput()
+                    //.setVisibility(hidden ? CardService.Visibility.HIDDEN : CardService.Visibility.VISIBLE)
+                    .setValue(data.prompt_text_input || 'You are a cat. Your name is Neko. Write a short poem about your day.')
+                    .setId(Addon.PROPERTIES.prompt_text_input)
+                    .setFieldName(Addon.PROPERTIES.prompt_text_input)
+                    .setTitle('📝 Your Prompt')
+                    .setHint('Enter your prompt for the AI model, for example: "Write a poem about a sunset."')
+                    .setMultiline(true)
+            );
 
             // Add a dropdown to select the Gemini model
             const geminiModelSelector =
