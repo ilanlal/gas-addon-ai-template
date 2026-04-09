@@ -1,5 +1,5 @@
 require('..');
-const { Addon } = require('../../src/Addon');
+const { Addon, Common } = require('../../src/Addon');
 
 const controller = Addon.Settings.Controller;
 
@@ -13,7 +13,7 @@ describe('Addon.Settings.Controller', () => {
         it('should handle Load', () => {
             // mock event parameters
             const e = { parameters: {} };
-            const settingsCard = controller.Load(e);
+            const settingsCard = controller.PushHomeCard(e);
 
             expect(settingsCard).toBeDefined();
             const cardData = settingsCard.getData();
@@ -28,12 +28,12 @@ describe('Addon.Settings.Controller', () => {
             const e = {
                 commonEventObject: {
                     formInputs: {
-                        [Addon.PROPERTIES.indentation_spaces]: {
+                        [Common.INPUT.SYSTEM.ENABLE_EVENT_LOGGING]: {
                             stringInputs: {
-                                value: ['4']
+                                value: ['OFF']
                             }
                         },
-                        [Addon.PROPERTIES.show_errors_switch]: {
+                        [Common.INPUT.SYSTEM.DISPLAY_ERROR_CARD]: {
                             stringInputs: {
                                 value: ['ON']
                             }
@@ -51,9 +51,9 @@ describe('Addon.Settings.Controller', () => {
             expect(cardData.notification).toBeUndefined();
 
             // verify properties were saved
-            const userProperties = PropertiesService.getUserProperties();
-            expect(userProperties.getProperty(Addon.PROPERTIES.indentation_spaces)).toBe('4');
-            expect(userProperties.getProperty(Addon.PROPERTIES.show_errors_switch)).toBe('ON');
+            const userProperties = PropertiesService.getDocumentProperties();
+            expect(userProperties.getProperty(Common.INPUT.SYSTEM.ENABLE_EVENT_LOGGING)).toBe('OFF');
+            expect(userProperties.getProperty(Common.INPUT.SYSTEM.DISPLAY_ERROR_CARD)).toBe('ON');
         });
 
 

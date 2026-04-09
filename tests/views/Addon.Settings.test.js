@@ -6,7 +6,7 @@ const view = Addon.Settings.View;
 describe('Addon.Settings.View', () => {
     // Home card test
     it('should build Settings Card', () => {
-    const data = Addon.Modules.App.getData();
+    const data = Addon.getData();
         const settingsCard = view.HomeCard(data);
         expect(settingsCard).toBeDefined();
         const cardData = settingsCard.getData();

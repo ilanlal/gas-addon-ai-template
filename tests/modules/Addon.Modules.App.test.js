@@ -1,7 +1,7 @@
 require('..');
-const { Addon } = require('../../src/Addon');
+const { Addon, Common } = require('../../src/Addon');
 
-describe('Addon.Modules.App', () => {
+describe('Common.Modules.App', () => {
     beforeEach(() => {
         PropertiesService.getScriptProperties().deleteAllProperties();
         PropertiesService.getUserProperties().deleteAllProperties();
@@ -33,16 +33,15 @@ describe('Addon.Modules.App', () => {
 
     // getData test
     it('should retrieve correct data from App module', () => {
-        const userProperties = PropertiesService.getUserProperties();
         const membershipInfo = {
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
-            balance: 10
+            [Common.INPUT.SYSTEM.MEMBERSHIP.EXPIRES_AT]: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days from now
+            [Common.INPUT.SYSTEM.MEMBERSHIP.BALANCE]: 10
         };
-        userProperties.setProperty(Addon.Modules.App.MEMBERSHIP_PROPERTY_KEY, JSON.stringify(membershipInfo));
-        const data = Addon.Modules.App.getData();
+        Common.Modules.CRM.Membership.setMembershipInfo(membershipInfo);
+        const data = Addon.getData();
         expect(data).toBeDefined();
-        expect(data.isPremium).toBe(true);
-        expect(data.balance).toBe(10);
-        expect(data.expiresAt).toBeInstanceOf(Date);
+        expect(data[Common.INPUT.SYSTEM.MEMBERSHIP.IS_PREMIUM]).toBe(true);
+        expect(data[Common.INPUT.SYSTEM.MEMBERSHIP.BALANCE]).toBe(10);
+        expect(data[Common.INPUT.SYSTEM.MEMBERSHIP.EXPIRES_AT]).toBeInstanceOf(Date);
     });
 });

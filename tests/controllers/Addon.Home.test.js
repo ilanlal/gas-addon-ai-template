@@ -1,5 +1,5 @@
 require('..');
-const { Addon } = require('../../src/Addon');
+const { Addon, Common } = require('../../src/Addon');
 
 const controller = Addon.Home.Controller;
 

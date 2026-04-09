@@ -1,5 +1,5 @@
 require('..');
-const { Addon } = require('../../src/Addon');
+const { Addon, Common } = require('../../src/Addon');
 const controller = Addon.GenerateContent.Controller;
 const SpreadsheetApp = require('@ilanlal/gasmocks/src/spreadsheetapp/SpreadsheetApp');
 const Sheet = require('@ilanlal/gasmocks/src/spreadsheetapp/classes/Sheet');
@@ -15,7 +15,7 @@ describe('Addon.GenerateContent.Controller', () => {
         UrlFetchAppStubConfiguration.reset();
 
         // Set up PropertiesService with default values for testing
-        PropertiesService.getUserProperties().setProperty(Addon.PROPERTIES.gemini_api_key, geminiApiKeyValue);
+        PropertiesService.getUserProperties().setProperty(Common.INPUT.GEMINI.GEMINI_API_KEY, geminiApiKeyValue);
     });
 
     // Load test
@@ -42,8 +42,8 @@ describe('Addon.GenerateContent.Controller', () => {
         const e = {
             commonEventObject: {
                 parameters: {
-                    [Addon.PROPERTIES.prompt_text_input]: 'Test prompt for content generation',
-                    [Addon.PROPERTIES.gemini_model_selector]: 'gemini-2.0-flash',
+                    [Common.INPUT.GEMINI.PROMPT_TEXT_INPUT]: 'Test prompt for content generation',
+                    [Common.INPUT.GEMINI.GEMINI_MODEL_SELECTOR]: 'gemini-2.0-flash',
                 }
             }
         };
@@ -75,7 +75,7 @@ describe('Addon.GenerateContent.Controller', () => {
         };
 
         // Mock the UrlFetchApp response for the Gemini API generateContent call
-        const url = Addon.Modules.GeminiAPI.API_ENDPOINT_URL + Addon.Modules.GeminiAPI.MODELS['gemini-3-flash-preview'] + ':generateContent';
+        const url = Common.Modules.GeminiApiClient.API_ENDPOINT_URL + Common.Modules.GeminiAgent.MODELS['gemini-3-flash-preview'] + ':generateContent';
 
         UrlFetchAppStubConfiguration.when(url)
             .return(new HttpResponse()
