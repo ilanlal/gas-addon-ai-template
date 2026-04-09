@@ -1,0 +1,4 @@
+# Ignore files for clasp
+
+**/*.test.js
+**/index.js
