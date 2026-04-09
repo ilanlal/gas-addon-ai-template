@@ -216,7 +216,7 @@ Common.INPUT = {
 };
 
 Common.Modules = {
-        Sheet: {
+    Sheet: {
         version: '1.1.0',
         get WEBHOOK_EVENT_SHEET_META() {
             return {
@@ -937,10 +937,9 @@ Common.Modules = {
 
 Addon.Media = {
     DEFAULT_IMAGE_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/icons/256x256-transparent.ico',
-    WELCOME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/logo24.png',
+    WELCOME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/icons/256x256-transparent.ico',
     YOU_GOT_IT_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-you-got-it.webp',
     BIG_TIME_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-big-time.webp',
-    I_AM_THINKING_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-i-am-thinking.webp',
     YES_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-yes.webp',
     PAY_ATTENTION_IMG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/bitmoji-pay-attention.webp',
     LOGO_PNG_URL: 'https://raw.githubusercontent.com/ilanlal/gas-addon-ai-template/refs/heads/main/assets/icons/256x256-transparent.ico'

@@ -1,5 +1,5 @@
 {
-  "name": "@ilanlal/ss-json-editor",
+  "name": "@ilanlal/gas-addon-ai-template",
   "version": "1.0.0",
   "description": "A Google Sheets add-on to edit JSON data in a spreadsheet format.",
   "main": "./src/index.js",
@@ -15,7 +15,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ilanlal/ss-json-editor.git"
+    "url": "git+https://github.com/ilanlal/gas-addon-ai-template.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com",
@@ -32,9 +32,9 @@
   "author": "Ilan Laloum <ilanlal@gmail.com> (https://github.com/ilanlal)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ilanlal/ss-json-editor/issues"
+    "url": "https://github.com/ilanlal/gas-addon-ai-template/issues"
   },
-  "homepage": "https://github.com/ilanlal/ss-json-editor#readme",
+  "homepage": "https://github.com/ilanlal/gas-addon-ai-template#readme",
   "devDependencies": {
     "@babel/core": "^7.28.4",
     "@babel/preset-env": "^7.28.3",
