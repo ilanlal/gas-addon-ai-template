@@ -23,15 +23,22 @@ function onOpen(e) {
  * @see https://developers.google.com/apps-script/guides/web
  */
 function doGet(e) {
-    // return html content
-    let htmlContent = '<h1>Json Studio</h1>';
-    htmlContent += '<p>Welcome to Json Studio Google Workspace Add-on!</p>';
-    htmlContent += '<p>This add-on helps you format and minify JSON data directly within your Google Sheets.</p>';
-    if (typeof HtmlService !== 'undefined') {
-        return HtmlService.createHtmlOutput(htmlContent);
-    } else {
-        return null;
-    }
+    // Handle GET request parameters
+    const params = e.parameter;
+
+    let htmlContent = '<h1>AI Studio</h1>';
+    htmlContent += '<p>Welcome to AI Studio for Google Sheets!</p>';
+    htmlContent += '<p>Use the sidebar to access various plugins and features to enhance your AI capabilities within Google Sheets.</p>';
+
+    // Return HTML output
+    return HtmlService
+        .createHtmlOutput(htmlContent)
+        .setTitle('AI Studio');
+
+    // Or return JSON
+    // return ContentService
+    //   .createTextOutput(JSON.stringify({ status: 'success' }))
+    //   .setMimeType(ContentService.MimeType.JSON);
 }
 
 // Export the functions for testing
