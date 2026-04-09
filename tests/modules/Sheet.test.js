@@ -1,5 +1,5 @@
 require('..');
-const { Addon, Common } = require('../../src/Addon');
+const { Common } = require('../../src/Addon');
 
 describe('Addon Modules Sheet', () => {
     beforeEach(() => {

@@ -1,6 +1,6 @@
 require('..');
 const SpreadsheetStubConfiguration = require('@ilanlal/gasmocks/src/spreadsheetapp/classes/SpreadsheetStubConfiguration');
-const { Addon, Common } = require('../../src/Addon');
+const { Common } = require('../../src/Addon');
 const PropertiesService = require('@ilanlal/gasmocks/src/properties/PropertiesService');
 
 describe('Host.Modules.TerminalOutput', () => {
@@ -19,11 +19,11 @@ describe('Host.Modules.TerminalOutput', () => {
             }
         };
 
-        const sheet = Common.Modules.TerminalOutput.writeGeminiResponse(
+        const sheet = Common.Modules.Sheet.writeGeminiResponse(
             activeSpreadsheet, eventObject, 'gemini-3-flash-preview', { sample: 'payload' }, { sample: 'response' });
 
         expect(sheet).toBeDefined();
-        expect(sheet.getName()).toBe(Common.Modules.TerminalOutput.SHEET_META.name);
+        expect(sheet.getName()).toBe(Common.Modules.Sheet.TERMINAL_OUTPUT_SHEET_META.name);
 
         // Verify range length
         const lastRow = sheet.getLastRow();
