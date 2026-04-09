@@ -1110,7 +1110,7 @@ Addon.Home = {
                         .setText('💎 Upgrade to Premium')
                         .setBackgroundColor(Addon.primaryColor())
                         .setOnClickAction(CardService.newAction()
-                            .setFunctionName('Addon.UserProfile.Controller.Load'))));
+                            .setFunctionName('Addon.UserProfile.Controller.PushHomeCard'))));
             }
 
             return cardBuilder.build();

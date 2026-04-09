@@ -36,11 +36,11 @@
       "universalActions": [
         {
           "label": "Profile",
-          "runFunction": "Addon.UserProfile.Controller.Load"
+          "runFunction": "Addon.UserProfile.Controller.PushHomeCard"
         },
         {
           "label": "Settings",
-          "runFunction": "Addon.Settings.Controller.Load"
+          "runFunction": "Addon.Settings.Controller.PushHomeCard"
         },
         {
           "label": "Help",
