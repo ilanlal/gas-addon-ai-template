@@ -39,7 +39,7 @@ describe('Addon.ConfirmationCard', () => {
             };
             expect(() => {
                 Addon.ConfirmationCard.Controller['Load'](event);
-            }).toThrowError('Missing required parameters: message, onClickFunctionName');
+            }).toThrow('Missing required parameters: message, onClickFunctionName');
         });
 
         // Cancel test
